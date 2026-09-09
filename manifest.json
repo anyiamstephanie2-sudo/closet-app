@@ -1,7 +1,7 @@
 {
-  "name": "Closet",
-  "short_name": "Closet",
-  "description": "Wear what you own. Sell what you don't.",
+  "name": "Rekko",
+  "short_name": "Rekko",
+  "description": "Your AI-powered closet. Get outfit ideas from what you own and sell what you don't.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#EAE4D6",
