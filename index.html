@@ -53,11 +53,14 @@
   /* Outfits */
   .gen-btn{width:100%;background:var(--ink);color:var(--paper);border:none;padding:14px;border-radius:4px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:22px;transition:transform .12s ease;}
   .gen-btn:active{transform:scale(0.97);}
-  .card-stack{position:relative;height:270px;}
+  .card-stack{position:relative;height:310px;}
   .outfit-card{position:absolute;inset:0;background:#fff;border-radius:8px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.14);cursor:grab;user-select:none;touch-action:pan-y;}
-  .outfit-card .title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:10px;}
-  .outfit-card .imgs{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
-  .outfit-card .imgs img{width:64px;height:64px;object-fit:cover;border-radius:4px;background:var(--paper-dim);}
+  .outfit-card .title{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:12px;}
+  .outfit-card .collage{position:relative;height:150px;margin-bottom:14px;}
+  .outfit-card .collage img{
+    position:absolute;object-fit:cover;border-radius:6px;background:var(--paper-dim);
+    box-shadow:0 4px 14px rgba(0,0,0,0.12);border:3px solid #fff;
+  }
   .outfit-card .note{font-size:12.5px;color:var(--tan);font-weight:500;}
   .outfit-card .hint{margin-top:16px;font-size:11.5px;opacity:0.45;text-align:center;}
   .swipe-actions{display:flex;justify-content:center;gap:30px;margin-top:24px;}
@@ -278,6 +281,25 @@ function generateRuleBasedOutfits(){
   return outfits;
 }
 
+const COLLAGE_LAYOUT = [
+  { top: 0,  left: 0,   width: 115, rotate: -7, z: 4 },
+  { top: 14, left: 92,  width: 115, rotate: 5,  z: 3 },
+  { top: 34, left: 184, width: 108, rotate: -9, z: 2 },
+  { top: 8,  left: 252, width: 100, rotate: 8,  z: 1 },
+];
+
+function buildCollage(itemIds){
+  const withImages = itemIds
+    .map(id => state.items.find(i => i.id === id))
+    .filter(it => it && it.image)
+    .slice(0, 4);
+  if(withImages.length === 0) return `<div style="height:100%;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;">No photos for this combo</div>`;
+  return withImages.map((it, i) => {
+    const pos = COLLAGE_LAYOUT[i];
+    return `<img src="${it.image}" style="top:${pos.top}px;left:${pos.left}px;width:${pos.width}px;height:${pos.width}px;transform:rotate(${pos.rotate}deg);z-index:${pos.z};">`;
+  }).join("");
+}
+
 function renderOutfits(){
   let body = `<button class="gen-btn" onclick="handleGenerate()">✦ Generate today's outfits</button>`;
 
@@ -287,15 +309,12 @@ function renderOutfits(){
     body += `<div class="done-msg">That's all for today.<div class="sub">${state.savedOutfits.length} outfit${state.savedOutfits.length===1?"":"s"} saved so far.</div></div>`;
   } else {
     const outfit = state.outfits[state.outfitIndex];
-    const imgs = outfit.itemIds.map(id => {
-      const it = state.items.find(i => i.id === id);
-      return it && it.image ? `<img src="${it.image}">` : "";
-    }).join("");
+    const collage = buildCollage(outfit.itemIds);
     body += `
       <div class="card-stack">
         <div class="outfit-card" id="topCard">
           <div class="title">${outfit.title}</div>
-          <div class="imgs">${imgs}</div>
+          <div class="collage">${collage}</div>
           <div class="note">${outfit.note}</div>
           <div class="hint">← swipe to skip · swipe to save →</div>
         </div>
